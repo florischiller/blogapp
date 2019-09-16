@@ -12,6 +12,8 @@ buildscript {
     ext.shadow_version = '2.0.4'
     ext.gradledocker_version = '0.22.1'
 
+    ext.mongoDbPort = 27017
+
     repositories {
         mavenCentral()
         jcenter()
@@ -74,6 +76,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    environment "MONGODB_PORT", mongoDbPort
 }
 
 shadowJar {
@@ -88,7 +91,7 @@ shadowJar {
 dockerRun {
     name 'testMongoDb'
     image 'mongo'
-    ports '27017:27017'
+    ports '27018:27017'
     env 'MONGO_INITDB_ROOT_USERNAME': 'blog', 'MONGO_INITDB_ROOT_PASSWORD': 'password'
     clean true
 }
@@ -104,5 +107,9 @@ docker {
 }
 
 task completeBuild(type: GradleBuild) {
-    tasks = ['clean', 'dockerRun', 'build', 'shadowJar', 'dockerStop', 'docker']
+    project.ext {
+        mongoDbPort = 27018
+    }
+    tasks = ['clean', 'dockerRun', 'build', 'shadowJar', 'docker']
 }
+completeBuild.finalizedBy('dockerStop')

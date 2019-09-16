@@ -1,6 +1,7 @@
 package io.fls.blogapp.rest.routes
 
 import com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath
+import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import io.fls.blogapp.core.service.hashPassword
 import io.fls.blogapp.modules.modules
@@ -24,7 +25,9 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.get
 import org.koin.core.inject
+import org.koin.core.qualifier.named
 import org.koin.test.KoinTest
 import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
@@ -221,8 +224,8 @@ class ThreadRouteKtTest : KoinTest {
     private fun countAllThreads() = database?.getCollection("threads")?.find()?.count()
 
     private fun saveUserInDB(userDbo: UserDbo) {
-        val collection = database?.getCollection<UserDbo>("users")
-        collection?.save(userDbo)
+        val collection = get<MongoCollection<UserDbo>>(named("usersCollection"))
+        collection.save(userDbo)
     }
 
     private fun TestApplicationRequest.addJwtHeader(user: JwtUser) =

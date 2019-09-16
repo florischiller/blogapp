@@ -73,8 +73,8 @@ fun Application.main() {
 }
 
 fun validateUser(credential: JWTCredential, userService: UserService): Principal? {
-    val id = credential.payload.getClaim("id").asString()
-    return userService.findById(id)?.let { user ->
+    val name = credential.payload.getClaim("name").asString()
+    return userService.findByName(name)?.let { user ->
         JwtUser(id = user.id ?: "", name = user.name, email = user.email)
     }
 }

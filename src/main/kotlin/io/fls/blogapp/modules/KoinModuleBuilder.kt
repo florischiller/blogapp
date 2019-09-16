@@ -3,6 +3,7 @@ package io.fls.blogapp.modules
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
 import com.mongodb.client.MongoDatabase
+import com.mongodb.client.model.Indexes
 import com.typesafe.config.ConfigFactory
 import io.fls.blogapp.core.ports.ThreadPersistencePort
 import io.fls.blogapp.core.ports.UserPersistencePort
@@ -12,9 +13,12 @@ import io.fls.blogapp.core.service.UserService
 import io.fls.blogapp.core.service.UserServiceImpl
 import io.fls.blogapp.persistence.MongoDbThreadPersistenceAdapterImpl
 import io.fls.blogapp.persistence.MongoDbUserPersistenceAdapterImpl
+import io.fls.blogapp.persistence.entities.UserDbo
 import io.github.config4k.extract
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.litote.kmongo.KMongo
+import org.litote.kmongo.getCollection
 
 data class MongoDbConfig(
     val host: String,
@@ -34,7 +38,7 @@ val modules = module(createdAtStart = true) {
         MongoDbThreadPersistenceAdapterImpl(get())
     }
     single<UserPersistencePort> {
-        MongoDbUserPersistenceAdapterImpl(get())
+        MongoDbUserPersistenceAdapterImpl(get(named("usersCollection")))
     }
     // Repositories
     single<MongoDatabase> {
@@ -46,6 +50,15 @@ val modules = module(createdAtStart = true) {
             listOf(createMongoCredential(mongodbConfig))
         )
         client.getDatabase(mongodbConfig.database)
+    }
+
+    single(named("usersCollection")) {
+        val database: MongoDatabase = get()
+        val col = database.getCollection<UserDbo>("users")
+        if (!col.listIndexes().contains(Indexes.ascending("name"))) {
+            col.createIndex(Indexes.ascending("name"))
+        }
+        col
     }
 }
 

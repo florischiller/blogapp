@@ -8,9 +8,12 @@ import io.ktor.application.call
 import io.ktor.features.BadRequestException
 import io.ktor.features.NotFoundException
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.path
 import io.ktor.request.receive
+import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.routing.Route
+import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import org.koin.ktor.ext.inject
@@ -26,17 +29,19 @@ data class UserJwtResponseDto(
     val jwt: String
 )
 
-data class UserCreatedResponseDto(
-    val id: String?
+data class UserDto(
+    val id: String?,
+    val name: String,
+    val email: String
 )
 
 fun Route.routeUser() {
     val userService: UserService by inject()
     route("/users") {
-        post("/{id}/jwt") {
-            val id = call.parameters["id"] ?: throw BadRequestException(message = "Die übergebene ID war leer")
+        post("/{name}/jwt") {
+            val name = call.parameters["name"] ?: throw BadRequestException(message = "Die übergebene ID war leer")
             val userRequest = call.receive<UserRequestDto>()
-            val user = userService.verify(id, userRequest.password)
+            val user = userService.verify(name, userRequest.password)
                 ?: throw NotFoundException(message = "Der Eintrag wurde nicht gefunden")
             val jwt = JwtVerifer.makeToken(transformToJwtUser(user))
             call.respond(message = UserJwtResponseDto(jwt), status = HttpStatusCode.OK)
@@ -44,7 +49,15 @@ fun Route.routeUser() {
         post {
             val userRequest = call.receive<UserCreateDto>()
             val user = userService.save(transformToModel(userRequest))
-            call.respond(message = UserCreatedResponseDto(id = user.id), status = HttpStatusCode.Created)
+            call.response.header("location", call.request.path() + "/" + user.name)
+            call.respond(message = transformToDto(user), status = HttpStatusCode.Created)
+        }
+        get("/{name}") {
+            val name =
+                call.parameters["name"] ?: throw BadRequestException(message = "Ein Pflichtwert war leer!")
+            val user = userService.findByName(name)
+                ?: throw NotFoundException(message = "Der übergeben Nutzername war leer")
+            call.respond(message = transformToDto(user), status = HttpStatusCode.OK)
         }
     }
 }
@@ -55,3 +68,6 @@ private fun transformToJwtUser(user: User): JwtUser {
 
 private fun transformToModel(user: UserCreateDto): User =
     User(name = user.name, email = user.email, password = user.password, id = null)
+
+private fun transformToDto(user: User): UserDto =
+    UserDto(name = user.name, email = user.email, id = user.id)

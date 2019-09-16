@@ -1,27 +1,25 @@
 package io.fls.blogapp.persistence
 
-import com.mongodb.client.MongoDatabase
+import com.mongodb.client.MongoCollection
 import io.fls.blogapp.core.model.User
 import io.fls.blogapp.core.ports.UserPersistencePort
 import io.fls.blogapp.persistence.entities.UserDbo
-import org.litote.kmongo.findOneById
-import org.litote.kmongo.getCollection
+import org.litote.kmongo.eq
+import org.litote.kmongo.findOne
 import org.litote.kmongo.save
 
 class MongoDbUserPersistenceAdapterImpl(
-    private var database: MongoDatabase
+    private var collection: MongoCollection<UserDbo>
 ) : UserPersistencePort {
     override fun save(user: User): User {
-        val col = database.getCollection<UserDbo>("users")
         val dboToSave = transformToDbo(user)
-        col.save(dboToSave)
+        collection.save(dboToSave)
 
         return transformToModel(dboToSave)
     }
 
-    override fun findById(id: String): User? {
-        val col = database.getCollection<UserDbo>("users")
-        val foundUser = col.findOneById(id)
+    override fun findByName(name: String): User? {
+        val foundUser = collection.findOne(UserDbo::name eq name)
 
         return if (foundUser != null) transformToModel(foundUser)
         else null

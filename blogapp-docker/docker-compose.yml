@@ -17,6 +17,8 @@ services:
     restart: always
     expose:
       - 27017
+    ports:
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: blog
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -32,6 +34,8 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: blog
       ME_CONFIG_MONGODB_ADMINPASSWORD: password
       ME_CONFIG_MONGODB_SERVER: mongo
+    depends_on:
+      - mongo
     networks:
       - database
 
