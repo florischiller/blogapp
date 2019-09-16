@@ -1,4 +1,4 @@
-package io.fls.blogapp.rest
+package io.fls.blogapp.rest.routes
 
 import io.ktor.application.call
 import io.ktor.http.ContentType
