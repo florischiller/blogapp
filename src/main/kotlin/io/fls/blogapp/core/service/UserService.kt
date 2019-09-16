@@ -34,9 +34,10 @@ class UserServiceImpl(
 
 fun hashPassword(password: String): String {
     val hashKey = hex("6819b57a326945c1968f45236589")
-    val hmacKey = SecretKeySpec(hashKey, "HmacSHA1")
+    val algorithm = "HmacSHA512"
+    val hmacKey = SecretKeySpec(hashKey, algorithm)
 
-    val hmac = Mac.getInstance("HmacSHA1")
+    val hmac = Mac.getInstance(algorithm)
     hmac.init(hmacKey)
     return hex(hmac.doFinal(password.toByteArray(Charsets.UTF_8)))
 }
