@@ -35,6 +35,7 @@ import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ThreadRouteKtTest : KoinTest {
+    val apiPath = "/api/v1/threads"
     val userDbo = UserDbo(
         _id = null,
         name = "Horst",
@@ -68,7 +69,7 @@ class ThreadRouteKtTest : KoinTest {
     fun testPostThread() {
         val jwtUser = createAuthenticatedUser()
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Post, "/api/v1/threads") {
+            handleRequest(HttpMethod.Post, apiPath) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     """
@@ -86,7 +87,7 @@ class ThreadRouteKtTest : KoinTest {
                 assertThat(response.content, hasJsonPath("$.id", not(nullValue())))
                 assertThat(response.content, hasJsonPath("$.userId", equalTo(jwtUser.id)))
                 assertThat(response.content, hasJsonPath("$.userName", equalTo(jwtUser.name)))
-                assertThat(response.headers.get("location"), startsWith("/api/v1/threads"))
+                assertThat(response.headers.get("location"), startsWith(apiPath))
                 assertThat(countAllThreads(), equalTo(1))
             }
         }
@@ -96,7 +97,7 @@ class ThreadRouteKtTest : KoinTest {
     fun testPostThreadPlichtfelderLeer() {
         val jwtUser = createAuthenticatedUser()
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Post, "/api/v1/threads") {
+            handleRequest(HttpMethod.Post, apiPath) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     """
@@ -125,7 +126,7 @@ class ThreadRouteKtTest : KoinTest {
     fun testPostThreadInvaliderJsonString() {
         val jwtUser = createAuthenticatedUser()
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Post, "/api/v1/threads") {
+            handleRequest(HttpMethod.Post, apiPath) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     """
@@ -156,7 +157,7 @@ class ThreadRouteKtTest : KoinTest {
         val userThreadDbo = createDefaultUserDbo(jwtUser)
         saveUserThreadInDB(userThreadDbo)
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Get, "/api/v1/threads/" + userThreadDbo._id) {
+            handleRequest(HttpMethod.Get, apiPath + userThreadDbo._id) {
                 addJwtHeader(jwtUser)
             }.apply {
                 assertEquals(response.status(), HttpStatusCode.OK)
@@ -173,7 +174,7 @@ class ThreadRouteKtTest : KoinTest {
     fun testGetThreadNotFound() {
         val jwtUser = createAuthenticatedUser()
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Get, "/api/v1/threads/" + 1) {
+            handleRequest(HttpMethod.Get, apiPath + 1) {
                 addJwtHeader(jwtUser)
             }.apply {
                 assertEquals(response.status(), HttpStatusCode.NotFound)
@@ -194,7 +195,7 @@ class ThreadRouteKtTest : KoinTest {
         val userThreadDbo = createDefaultUserDbo(jwtUser)
         saveUserThreadInDB(userThreadDbo)
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Delete, "/api/v1/threads/" + userThreadDbo._id) {
+            handleRequest(HttpMethod.Delete, apiPath + userThreadDbo._id) {
                 addJwtHeader(jwtUser)
             }.apply {
                 assertEquals(response.status(), HttpStatusCode.NoContent)
@@ -207,7 +208,7 @@ class ThreadRouteKtTest : KoinTest {
     fun testDeleteThreadNotFound() {
         val jwtUser = createAuthenticatedUser()
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Delete, "/api/v1/threads/" + 1) {
+            handleRequest(HttpMethod.Delete, apiPath + 1) {
                 addJwtHeader(jwtUser)
             }.apply {
                 assertEquals(HttpStatusCode.NoContent, response.status())

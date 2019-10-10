@@ -1,115 +1,14 @@
-group 'io.fls'
-version '1.0.0-SNAPSHOT'
+group 'io.fls.blogapp'
 
 buildscript {
-    ext.kotlin_version = '1.3.50'
-    ext.ktor_version = '1.2.4'
-    ext.junit_version = '5.5.2'
-    ext.koin_version = '2.0.1'
-    ext.mongodriver_version = '3.11.0'
-    ext.config4k_version = '0.4.1'
-    ext.jackson_version = '2.9.9'
-    ext.shadow_version = '2.0.4'
-    ext.gradledocker_version = '0.22.1'
+}
 
-    ext.mongoDbPort = 27017
-
+allprojects {
     repositories {
+        mavenLocal()
         mavenCentral()
         jcenter()
-        gradlePluginPortal()
     }
 
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.github.jengelman.gradle.plugins:shadow:$shadow_version"
-        classpath "gradle.plugin.com.palantir.gradle.docker:gradle-docker:$gradledocker_version"
-    }
+    version '1.0.0-SNAPSHOT'
 }
-
-apply plugin: 'com.palantir.docker'
-apply plugin: 'com.palantir.docker-run'
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'kotlin'
-apply plugin: 'application'
-
-mainClassName = "io.fls.blogapp.rest.BlogApplicationKt"
-
-repositories {
-    mavenLocal()
-    jcenter()
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "11"
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "11"
-}
-
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
-    compile "io.ktor:ktor-server-netty:$ktor_version"
-    compile "ch.qos.logback:logback-classic:$logback_version"
-    compile "io.ktor:ktor-server-core:$ktor_version"
-    implementation "io.ktor:ktor-jackson:$ktor_version"
-    implementation "io.ktor:ktor-auth-jwt:$ktor_version"
-
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version"
-
-    compile "org.litote.kmongo:kmongo:$mongodriver_version"
-    compile "io.github.config4k:config4k:$config4k_version"
-
-    implementation "org.koin:koin-ktor:$koin_version"
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
-    testCompile "org.junit.jupiter:junit-jupiter-params:$junit_version"
-    testCompile "org.junit.vintage:junit-vintage-engine:$junit_version"
-    testCompile "io.ktor:ktor-server-tests:$ktor_version"
-    testImplementation 'com.natpryce:hamkrest:1.7.0.0'
-    testImplementation 'com.jayway.jsonpath:json-path-assert:2.2.0'
-    testImplementation "org.koin:koin-test:$koin_version"
-}
-
-test {
-    useJUnitPlatform()
-    environment "MONGODB_PORT", mongoDbPort
-}
-
-shadowJar {
-    baseName = "${rootProject.name}"
-    classifier = null
-    version = null
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
-}
-
-dockerRun {
-    name 'testMongoDb'
-    image 'mongo'
-    ports '27018:27017'
-    env 'MONGO_INITDB_ROOT_USERNAME': 'blog', 'MONGO_INITDB_ROOT_PASSWORD': 'password'
-    clean true
-}
-
-dockerStop {
-}
-
-docker {
-    name "${project.group}/${rootProject.name}"
-    dockerfile project.file('/src/main/docker/Dockerfile')
-    files shadowJar.outputs
-    dependsOn(shadowJar, tasks["jar"])
-}
-
-task completeBuild(type: GradleBuild) {
-    project.ext {
-        mongoDbPort = 27018
-    }
-    tasks = ['clean', 'dockerRun', 'build', 'shadowJar', 'docker']
-}
-completeBuild.finalizedBy('dockerStop')

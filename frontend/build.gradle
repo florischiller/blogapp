@@ -1,0 +1,25 @@
+group 'io.fls.blogapp.frontend'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        gradlePluginPortal()
+    }
+
+    dependencies {
+        classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
+    }
+}
+
+node {
+    // Version of node to use.
+    version = '10.16.3'
+
+    // Version of npm to use.
+    npmVersion = '6.4.1'
+
+    // If true, it will download node using above parameters.
+    // If false, it will try to use globally installed node.
+    download = true
+}
