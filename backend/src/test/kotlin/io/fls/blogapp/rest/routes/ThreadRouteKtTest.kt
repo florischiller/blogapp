@@ -35,7 +35,7 @@ import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ThreadRouteKtTest : KoinTest {
-    val apiPath = "/api/v1/threads"
+    val apiPath = "/api/v1/threads/"
     val userDbo = UserDbo(
         _id = null,
         name = "Horst",
@@ -211,7 +211,7 @@ class ThreadRouteKtTest : KoinTest {
             handleRequest(HttpMethod.Delete, apiPath + 1) {
                 addJwtHeader(jwtUser)
             }.apply {
-                assertEquals(HttpStatusCode.NoContent, response.status())
+                assertEquals(response.status(), HttpStatusCode.NoContent)
                 assertThat(countAllThreads(), equalTo(0))
             }
         }

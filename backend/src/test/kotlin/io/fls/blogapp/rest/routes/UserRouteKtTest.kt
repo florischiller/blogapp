@@ -29,6 +29,7 @@ import org.litote.kmongo.save
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserRouteKtTest : KoinTest {
+    val API_URL = "/api/v1/users"
 
     var database: MongoDatabase? = null
     val name = "horst"
@@ -54,7 +55,7 @@ class UserRouteKtTest : KoinTest {
     @Test
     fun testCreateUser() {
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Post, "/api/v1/users") {
+            handleRequest(HttpMethod.Post, API_URL) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     """
@@ -70,7 +71,7 @@ class UserRouteKtTest : KoinTest {
                 assertThat(response.content, hasJsonPath("$.name", equalTo(name)))
                 assertThat(response.content, hasJsonPath("$.email", equalTo(email)))
                 assertThat(response.content, hasJsonPath("$.id", not(nullValue())))
-                assertThat(response.headers.get("location"), startsWith("/api/v1/users"))
+                assertThat(response.headers.get("location"), startsWith(API_URL))
             }
         }
     }
@@ -86,7 +87,7 @@ class UserRouteKtTest : KoinTest {
         saveUserInDB(userDbo)
 
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Post, "/api/v1/users") {
+            handleRequest(HttpMethod.Post, API_URL) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     """
@@ -118,7 +119,7 @@ class UserRouteKtTest : KoinTest {
         saveUserInDB(userDbo)
 
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Post, "/api/v1/users/${name}/jwt") {
+            handleRequest(HttpMethod.Post, API_URL + "/${name}/jwt") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     """
@@ -145,7 +146,7 @@ class UserRouteKtTest : KoinTest {
         saveUserInDB(userDbo)
 
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Post, "/api/v1/users/${name}/jwt") {
+            handleRequest(HttpMethod.Post, API_URL + "/${name}/jwt") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     """
@@ -178,7 +179,7 @@ class UserRouteKtTest : KoinTest {
         saveUserInDB(userDbo)
 
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Get, "/api/v1/users/${name}").apply {
+            handleRequest(HttpMethod.Get, API_URL + "/${name}").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertThat(response.content, hasJsonPath("$.name", equalTo(name)))
                 assertThat(response.content, hasJsonPath("$.email", equalTo(email)))
@@ -190,7 +191,7 @@ class UserRouteKtTest : KoinTest {
     @Test
     fun testGetUserWithoutUserInDb() {
         withTestApplication(Application::main) {
-            handleRequest(HttpMethod.Get, "/api/v1/users/${name}").apply {
+            handleRequest(HttpMethod.Get, API_URL + "/${name}").apply {
                 assertEquals(response.status(), HttpStatusCode.NotFound)
                 assertThat(
                     response.content, hasJsonPath(

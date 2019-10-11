@@ -1,6 +1,8 @@
 group 'io.fls.blogapp.frontend'
 
 buildscript {
+    ext.outputName = "blogapp-${project.name}"
+
     repositories {
         mavenCentral()
         jcenter()
@@ -38,9 +40,9 @@ npm_run_build {
 // pack output of the build into JAR file
 task packageNpmApp(type: Zip) {
     dependsOn npm_run_build
-    baseName 'npm-app'
+    baseName "${outputName}"
     extension 'jar'
-    destinationDir file("${projectDir}/build_packageNpmApp")
+    destinationDir file("${projectDir}/build_${outputName}")
     from('build') {
         // optional path under which output will be visible in Java classpath, e.g. static resources path
         into 'static'

@@ -29,7 +29,7 @@ data class MongoDbConfig(
     val database: String = "blog"
 )
 
-val modules = module(createdAtStart = true) {
+val modules = module(createdAtStart = false) {
     // Services
     single<ThreadService> { ThreadServiceImpl(get()) }
     single<UserService> { UserServiceImpl(get()) }
@@ -55,8 +55,9 @@ val modules = module(createdAtStart = true) {
     single(named("usersCollection")) {
         val database: MongoDatabase = get()
         val col = database.getCollection<UserDbo>("users")
-        if (!col.listIndexes().contains(Indexes.ascending("name"))) {
-            col.createIndex(Indexes.ascending("name"))
+        val indexNameAscending = Indexes.ascending("name")
+        if (!col.listIndexes().contains(indexNameAscending)) {
+            col.createIndex(indexNameAscending)
         }
         col
     }
