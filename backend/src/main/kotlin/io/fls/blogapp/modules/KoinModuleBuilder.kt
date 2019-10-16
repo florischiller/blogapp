@@ -14,6 +14,7 @@ import io.fls.blogapp.core.service.UserServiceImpl
 import io.fls.blogapp.persistence.MongoDbThreadPersistenceAdapterImpl
 import io.fls.blogapp.persistence.MongoDbUserPersistenceAdapterImpl
 import io.fls.blogapp.persistence.entities.UserDbo
+import io.fls.blogapp.persistence.entities.UserThreadDbo
 import io.github.config4k.extract
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -35,7 +36,7 @@ val modules = module(createdAtStart = false) {
     single<UserService> { UserServiceImpl(get()) }
     // Repositories
     single<ThreadPersistencePort> {
-        MongoDbThreadPersistenceAdapterImpl(get())
+        MongoDbThreadPersistenceAdapterImpl(get(named("threadsCollection")))
     }
     single<UserPersistencePort> {
         MongoDbUserPersistenceAdapterImpl(get(named("usersCollection")))
@@ -55,11 +56,18 @@ val modules = module(createdAtStart = false) {
     single(named("usersCollection")) {
         val database: MongoDatabase = get()
         val col = database.getCollection<UserDbo>("users")
-        val indexNameAscending = Indexes.ascending("name")
-        if (!col.listIndexes().contains(indexNameAscending)) {
-            col.createIndex(indexNameAscending)
+        if (database.listCollectionNames().contains("users")) {
+            val indexNameAscending = Indexes.ascending("name")
+            if (!col.listIndexes().contains(indexNameAscending)) {
+                col.createIndex(indexNameAscending)
+            }
         }
         col
+    }
+
+    single(named("threadsCollection")) {
+        val database: MongoDatabase = get()
+        database.getCollection<UserThreadDbo>("threads")
     }
 }
 

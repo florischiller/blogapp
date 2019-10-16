@@ -14,7 +14,6 @@ import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.auth.Authentication
 import io.ktor.auth.Principal
-import io.ktor.auth.authenticate
 import io.ktor.auth.jwt.JWTCredential
 import io.ktor.auth.jwt.jwt
 import io.ktor.features.CallLogging
@@ -65,9 +64,7 @@ fun Application.main() {
         defaultRoutes()
         route("/api/v1") {
             routeUser()
-            authenticate {
-                routeThreads()
-            }
+            routeThreads()
         }
     }
 }

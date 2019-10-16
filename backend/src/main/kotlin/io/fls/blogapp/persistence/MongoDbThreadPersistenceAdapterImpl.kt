@@ -1,34 +1,38 @@
 package io.fls.blogapp.persistence
 
-import com.mongodb.client.MongoDatabase
+import com.mongodb.client.MongoCollection
 import io.fls.blogapp.core.model.UserThread
 import io.fls.blogapp.core.ports.ThreadPersistencePort
 import io.fls.blogapp.persistence.entities.UserThreadDbo
 import org.litote.kmongo.deleteOneById
 import org.litote.kmongo.findOneById
-import org.litote.kmongo.getCollection
 import org.litote.kmongo.save
+import java.util.stream.Stream
 
 class MongoDbThreadPersistenceAdapterImpl(
-    private var database: MongoDatabase
+    private var collection: MongoCollection<UserThreadDbo>
 ) : ThreadPersistencePort {
+    override fun findAll(limit: Int, offset: Int): Stream<UserThread>? {
+        val foundThreads: Stream<UserThreadDbo> = collection.find().limit(limit).skip(offset)
+            .toSet().stream()
+
+        return foundThreads.map { transformToModel(it) }
+    }
+
     override fun delete(id: String) {
-        val col = database.getCollection<UserThreadDbo>("threads")
-        col.deleteOneById(id)
+        collection.deleteOneById(id)
     }
 
     override fun findById(id: String): UserThread? {
-        val col = database.getCollection<UserThreadDbo>("threads")
-        val foundThread = col.findOneById(id)
+        val foundThread = collection.findOneById(id)
 
         return if (foundThread != null) transformToModel(foundThread)
         else null
     }
 
     override fun create(thread: UserThread): UserThread {
-        val col = database.getCollection<UserThreadDbo>("threads")
         val threadDbo = transformToDbo(thread)
-        col.save(threadDbo)
+        collection.save(threadDbo)
         return transformToModel(threadDbo)
     }
 

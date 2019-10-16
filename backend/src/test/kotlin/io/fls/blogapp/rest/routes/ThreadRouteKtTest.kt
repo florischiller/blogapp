@@ -222,6 +222,30 @@ class ThreadRouteKtTest : KoinTest {
         collection?.save(userThreadDbo)
     }
 
+    @Test
+    fun testGetThreads() {
+        val jwtUser = createAuthenticatedUser()
+        val userThreadDbo1 = createDefaultUserDbo(jwtUser)
+        val userThreadDbo2 = createDefaultUserDbo(jwtUser)
+        val userThreadDbo3 = createDefaultUserDbo(jwtUser)
+
+        saveUserThreadInDB(userThreadDbo1)
+        saveUserThreadInDB(userThreadDbo2)
+        saveUserThreadInDB(userThreadDbo3)
+
+        withTestApplication(Application::main) {
+            handleRequest(HttpMethod.Get, apiPath).apply {
+                assertEquals(response.status(), HttpStatusCode.OK)
+                assertThat(response.content, hasJsonPath("$[*].id", hasItem(userThreadDbo1._id)))
+                assertThat(response.content, hasJsonPath("$[*].userName", hasItem(userThreadDbo1.userName)))
+                assertThat(response.content, hasJsonPath("$[*].id", hasItem(userThreadDbo2._id)))
+                assertThat(response.content, hasJsonPath("$[*].userName", hasItem(userThreadDbo2.userName)))
+                assertThat(response.content, hasJsonPath("$[*].id", hasItem(userThreadDbo3._id)))
+                assertThat(response.content, hasJsonPath("$[*].userName", hasItem(userThreadDbo3.userName)))
+            }
+        }
+    }
+
     private fun countAllThreads() = database?.getCollection("threads")?.find()?.count()
 
     private fun saveUserInDB(userDbo: UserDbo) {

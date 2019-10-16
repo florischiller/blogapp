@@ -29,7 +29,8 @@ node {
 
 npm_run_build {
     inputs.files fileTree("public")
-    inputs.files fileTree("src")
+    inputs.files fileTree("src/main")
+    inputs.files fileTree("src/test")
 
     inputs.file 'package.json'
     inputs.file 'package-lock.json'

@@ -29,11 +29,30 @@ class ApplicationKtTest : KoinTest {
     }
 
     @Test
-    fun testRoot() {
+    fun testRootRedirect1() {
         withTestApplication({ main() }) {
             handleRequest(HttpMethod.Get, "/").apply {
+                assertEquals(HttpStatusCode.Found, response.status())
+                assertEquals("/index.html", response.headers.get("location"))
+            }
+        }
+    }
+
+    @Test
+    fun testRootRedirect2() {
+        withTestApplication({ main() }) {
+            handleRequest(HttpMethod.Get, "").apply {
+                assertEquals(HttpStatusCode.Found, response.status())
+                assertEquals("/index.html", response.headers.get("location"))
+            }
+        }
+    }
+
+    @Test
+    fun testIndexHtml() {
+        withTestApplication({ main() }) {
+            handleRequest(HttpMethod.Get, "/index.html").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                assertEquals("HELLO WORLD!", response.content)
             }
         }
     }

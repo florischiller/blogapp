@@ -4,6 +4,7 @@ import io.fls.blogapp.core.model.UserThread
 import io.fls.blogapp.core.service.ThreadService
 import io.fls.blogapp.rest.jwt.JwtUser
 import io.ktor.application.call
+import io.ktor.auth.authenticate
 import io.ktor.auth.authentication
 import io.ktor.features.BadRequestException
 import io.ktor.features.NotFoundException
@@ -29,23 +30,34 @@ data class ThreadResponseDto(
 fun Route.routeThreads() {
     val threadService: ThreadService by inject()
     route("/threads") {
-        post {
-            val thread = call.receive<CreateThreadDto>()
-            val user: JwtUser = call.authentication.principal as JwtUser
-            val createdThread = threadService.create(transformToModell(thread, user))
-            call.response.header("location", call.request.path() + "/" + createdThread.id)
-            call.respond(message = transformToResponse(createdThread), status = HttpStatusCode.Created)
+        get("/") {
+            val limit: Int = call.request.queryParameters["limit"]?.toInt() ?: 20
+            val offset: Int = call.request.queryParameters["offset"]?.toInt() ?: 0
+            val foundThreads = threadService.findAll(limit, offset)
+                ?: throw NotFoundException(message = "Der Eintrag wurde nicht gefunden")
+            val mappedThreads = foundThreads.map { transformToResponse(it) }
+            call.respond(message = mappedThreads, status = HttpStatusCode.OK)
         }
-        get("/{id}") {
-            val id = call.parameters["id"] ?: throw BadRequestException(message = "Die übergebene ID war leer")
-            val foundThread =
-                threadService.findById(id) ?: throw NotFoundException(message = "Der Eintrag wurde nicht gefunden")
-            call.respond(message = transformToResponse(foundThread), status = HttpStatusCode.OK)
-        }
-        delete("/{id}") {
-            val id = call.parameters["id"] ?: throw BadRequestException(message = "Die übergebene ID war leer")
-            threadService.delete(id)
-            call.respond(HttpStatusCode.NoContent)
+        authenticate {
+            post {
+                val thread = call.receive<CreateThreadDto>()
+                val user: JwtUser = call.authentication.principal as JwtUser
+                val createdThread = threadService.create(transformToModell(thread, user))
+                call.response.header("location", call.request.path() + "/" + createdThread.id)
+                call.respond(message = transformToResponse(createdThread), status = HttpStatusCode.Created)
+            }
+            get("/{id}") {
+                val id = call.parameters["id"] ?: throw BadRequestException(message = "Die übergebene ID war leer")
+                val foundThread =
+                    threadService.findById(id) ?: throw NotFoundException(message = "Der Eintrag wurde nicht gefunden")
+                call.respond(message = transformToResponse(foundThread), status = HttpStatusCode.OK)
+            }
+            delete("/{id}") {
+                val id = call.parameters["id"] ?: throw BadRequestException(message = "Die übergebene ID war leer")
+                threadService.delete(id)
+                call.respond(HttpStatusCode.NoContent)
+            }
+
         }
     }
 }
