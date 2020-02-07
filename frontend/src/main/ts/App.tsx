@@ -5,7 +5,8 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faHome, faUserLock} from "@fortawesome/free-solid-svg-icons";
 import '../resources/css/App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Login from './login/Login'
+import Login from './user/form/Login'
+import CreateUser from './user/form/CreateUser'
 import ThreadList from './threads/ListThreads'
 
 function App() {
@@ -24,13 +25,14 @@ function App() {
                         </Navbar.Text>
                     </Navbar.Collapse>
                     <Navbar className={"justify-content-end"}>
-                        <Nav.Link as={Link} to="/login" className={"text-white"}>
+                        <Nav.Link as={Link} to="/user/login" className={"text-white"}>
                             <FontAwesomeIcon icon={faUserLock}/>
                         </Nav.Link>
                     </Navbar>
                 </Navbar>
                 <Switch>
-                    <Route path="/login" component={Login}/>
+                    <Route path="/user/login" component={Login}/>
+                    <Route path="/user/create" component={CreateUser}/>
                     <Route path="/" component={ThreadList}/>
                 </Switch>
             </header>

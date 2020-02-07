@@ -19,15 +19,15 @@ class MongoDbUserPersistenceAdapterImpl(
     }
 
     override fun findByName(name: String): User? {
-        val foundUser = collection.findOne(UserDbo::name eq name)
+        val foundUser = collection.findOne(UserDbo::username eq name)
 
         return if (foundUser != null) transformToModel(foundUser)
         else null
     }
 
     private fun transformToModel(user: UserDbo): User =
-        User(name = user.name, id = user._id, email = user.email, password = user.password)
+        User(username = user.username, id = user._id, email = user.email, password = user.password)
 
     private fun transformToDbo(user: User): UserDbo =
-        UserDbo(name = user.name, _id = user.id, email = user.email, password = user.password)
+        UserDbo(username = user.username, _id = user.id, email = user.email, password = user.password)
 }

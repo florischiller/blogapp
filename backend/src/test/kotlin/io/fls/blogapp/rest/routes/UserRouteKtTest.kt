@@ -80,7 +80,7 @@ class UserRouteKtTest : KoinTest {
     fun testCreateUserWithExistingUsername() {
         val userDbo = UserDbo(
             _id = null,
-            name = name,
+            username = name,
             password = hashPassword("password"),
             email = email
         )
@@ -112,7 +112,7 @@ class UserRouteKtTest : KoinTest {
     fun testCreateJwt() {
         val userDbo = UserDbo(
             _id = null,
-            name = name,
+            username = name,
             password = hashPassword("password"),
             email = email
         )
@@ -139,7 +139,7 @@ class UserRouteKtTest : KoinTest {
     fun testCreateJwtWrongPassword() {
         val userDbo = UserDbo(
             _id = null,
-            name = name,
+            username = name,
             password = hashPassword("password"),
             email = email
         )
@@ -172,7 +172,7 @@ class UserRouteKtTest : KoinTest {
     fun testGetUser() {
         val userDbo = UserDbo(
             _id = null,
-            name = name,
+            username = name,
             password = hashPassword("password"),
             email = email
         )

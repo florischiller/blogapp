@@ -38,7 +38,7 @@ class ThreadRouteKtTest : KoinTest {
     val apiPath = "/api/v1/threads/"
     val userDbo = UserDbo(
         _id = null,
-        name = "Horst",
+        username = "Horst",
         password = hashPassword("password"),
         email = "horst@horst.com"
     )

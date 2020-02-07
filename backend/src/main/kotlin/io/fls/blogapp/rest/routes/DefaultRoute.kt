@@ -12,11 +12,12 @@ internal fun Routing.defaultRoutes() {
 
 fun Route.routeFilesystem() {
     val pathToIndex = "static/index.html"
-    
+
     static {
         resources("static")
     }
     resource("/", pathToIndex)
     resource("/threads", pathToIndex)
-    resource("/login", pathToIndex)
+    resource("/user/login", pathToIndex)
+    resource("/user/create", pathToIndex)
 }

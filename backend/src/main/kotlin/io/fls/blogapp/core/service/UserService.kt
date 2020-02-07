@@ -29,8 +29,8 @@ class UserServiceImpl(
     }
 
     override fun save(user: User): User {
-        if (userPersistencePort.findByName(user.name) != null) {
-            throw KonfliktException("Der Nutzer exisitert bereits")
+        if (userPersistencePort.findByName(user.username) != null) {
+            throw KonfliktException("username: A User with this name already exists")
         }
         return userPersistencePort.save(
             user.copy(password = hashPassword(user.password))

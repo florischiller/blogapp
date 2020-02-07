@@ -11,7 +11,7 @@ import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 
-data class FehlerDto(val fehler: String, val status: Int)
+data class FehlerDto(val error: String, val status: Int)
 
 fun StatusPages.Configuration.exceptionHandler() {
     exception<MissingKotlinParameterException> {

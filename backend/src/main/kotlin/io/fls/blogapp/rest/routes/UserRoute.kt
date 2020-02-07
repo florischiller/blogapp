@@ -1,5 +1,6 @@
 package io.fls.blogapp.rest.routes
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.fls.blogapp.core.model.User
 import io.fls.blogapp.core.service.UserService
 import io.fls.blogapp.rest.jwt.JwtUser
@@ -19,8 +20,10 @@ import io.ktor.routing.route
 import org.koin.ktor.ext.inject
 
 data class UserRequestDto(val password: String)
+
+@JsonIgnoreProperties("confirmPassword")
 data class UserCreateDto(
-    val name: String,
+    val username: String,
     val password: String,
     val email: String
 )
@@ -31,7 +34,7 @@ data class UserJwtResponseDto(
 
 data class UserDto(
     val id: String?,
-    val name: String,
+    val username: String,
     val email: String
 )
 
@@ -49,7 +52,7 @@ fun Route.routeUser() {
         post {
             val userRequest = call.receive<UserCreateDto>()
             val user = userService.save(transformToModel(userRequest))
-            call.response.header("location", call.request.path() + "/" + user.name)
+            call.response.header("location", call.request.path() + "/" + user.username)
             call.respond(message = transformToDto(user), status = HttpStatusCode.Created)
         }
         get("/{name}") {
@@ -63,11 +66,11 @@ fun Route.routeUser() {
 }
 
 private fun transformToJwtUser(user: User): JwtUser {
-    return JwtUser(name = user.name, id = user.id ?: "", email = user.email)
+    return JwtUser(name = user.username, id = user.id ?: "", email = user.email)
 }
 
 private fun transformToModel(user: UserCreateDto): User =
-    User(name = user.name, email = user.email, password = user.password, id = null)
+    User(username = user.username, email = user.email, password = user.password, id = null)
 
 private fun transformToDto(user: User): UserDto =
-    UserDto(name = user.name, email = user.email, id = user.id)
+    UserDto(username = user.username, email = user.email, id = user.id)

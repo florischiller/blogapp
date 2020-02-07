@@ -1,16 +1,16 @@
 version: '3.3'
 services:
-  web:
-    image: io.fls/blogapp:latest
-    ports:
-      - 8085:8085
-    restart: always
-    depends_on:
-      - mongo
-    environment:
-      MONGODB_HOST: mongo
-    networks:
-      - database
+  #  web:
+  #    image: io.fls/blogapp:latest
+  #    ports:
+  #      - 8085:8085
+  #    restart: always
+  #    depends_on:
+  #      - mongo
+  #    environment:
+  #      MONGODB_HOST: mongo
+  #    networks:
+  #      - database
 
   mongo:
     image: mongo

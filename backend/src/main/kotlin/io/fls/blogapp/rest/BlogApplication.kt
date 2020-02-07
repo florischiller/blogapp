@@ -26,6 +26,7 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.sessions.Sessions
 import org.koin.core.context.startKoin
 import org.koin.ktor.ext.inject
 import java.text.SimpleDateFormat
@@ -59,6 +60,9 @@ fun Application.main() {
             validate { credential -> validateUser(credential, userService) }
         }
     }
+    install(Sessions) {
+        
+    }
 
     routing {
         defaultRoutes()
@@ -72,6 +76,6 @@ fun Application.main() {
 fun validateUser(credential: JWTCredential, userService: UserService): Principal? {
     val name = credential.payload.getClaim("name").asString()
     return userService.findByName(name)?.let { user ->
-        JwtUser(id = user.id ?: "", name = user.name, email = user.email)
+        JwtUser(id = user.id ?: "", name = user.username, email = user.email)
     }
 }
